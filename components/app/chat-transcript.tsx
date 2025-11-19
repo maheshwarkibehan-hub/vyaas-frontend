@@ -1,6 +1,7 @@
 'use client';
 
 import { AnimatePresence, type HTMLMotionProps, motion } from 'motion/react';
+import { easeInOut, easeOut } from 'framer-motion'; // ✅ FIX: easing functions import
 import { type ReceivedChatMessage } from '@livekit/components-react';
 import { ChatEntry } from '@/components/livekit/chat-entry';
 
@@ -12,7 +13,7 @@ const CONTAINER_MOTION_PROPS = {
     hidden: {
       opacity: 0,
       transition: {
-        ease: 'easeOut',
+        ease: easeOut,      // ✅ FIX: string → function
         duration: 0.3,
         staggerChildren: 0.1,
         staggerDirection: -1,
@@ -22,9 +23,8 @@ const CONTAINER_MOTION_PROPS = {
       opacity: 1,
       transition: {
         delay: 0.2,
-        ease: 'easeOut',
+        ease: easeOut,      // ✅ FIX: string → function
         duration: 0.3,
-        stagerDelay: 0.2,
         staggerChildren: 0.1,
         staggerDirection: 1,
       },
@@ -84,3 +84,4 @@ export function ChatTranscript({
     </AnimatePresence>
   );
 }
+
