@@ -8,7 +8,7 @@ import { getUserSubscription, type PlanType } from '@/lib/subscription';
 import { isUserBlocked, checkSessionStatus, clearForceLogout } from '@/lib/supabase';
 import { SuspendedModal } from '@/components/app/suspended-modal';
 import { DailyRewardsModal } from '@/components/app/daily-rewards-modal';
-import { Crown, Zap, Sparkles, Code, Image, MessageSquare, Shield, Clock, Users, Mic, Brain, Rocket, Gift, ZoomIn, ZoomOut } from 'lucide-react';
+import { Crown, Zap, Sparkles, Code, Image, MessageSquare, Shield, Clock, Users, Mic, Brain, Rocket, Gift, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Check if running as desktop app
@@ -269,6 +269,23 @@ export const WelcomeView = ({
                         >
                             <Crown size={18} />
                             <span>View Plans</span>
+                        </button>
+
+                        {/* Fullscreen Button */}
+                        <button
+                            onClick={() => {
+                                if (!document.fullscreenElement) {
+                                    document.documentElement.requestFullscreen().catch(err => {
+                                        toast.error('Fullscreen not supported');
+                                    });
+                                } else {
+                                    document.exitFullscreen();
+                                }
+                            }}
+                            className="relative w-full max-w-xs md:max-w-none md:w-auto px-8 py-3 md:py-4 bg-[#1a1a1a]/80 backdrop-blur-xl hover:bg-[#252525]/80 border border-white/30 rounded-xl font-medium text-base md:text-lg text-white hover:text-white transition-all hover:scale-105 active:scale-95 flex items-center gap-2 justify-center shadow-[0_0_15px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.1)] before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-b before:from-white/5 before:to-transparent before:pointer-events-none"
+                        >
+                            <Maximize2 size={18} />
+                            <span>Fullscreen</span>
                         </button>
                     </motion.div>
                 </div>
