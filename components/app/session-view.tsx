@@ -45,7 +45,7 @@ import { CodeModeModal } from '@/components/app/code-mode-modal';
 import { SystemLogsModal } from '@/components/app/system-logs-modal';
 import { SystemHealthModal } from '@/components/app/system-health-modal';
 import { GoogleMapComponent } from '@/components/app/map-component';
-import { FaceOverlay } from '@/components/app/face-overlay';
+import FaceOverlay from '@/components/app/face-overlay';
 
 const MotionBottom = motion.create('div');
 
