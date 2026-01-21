@@ -4,6 +4,12 @@ const withPWA = require('next-pwa')({
     skipWaiting: true,
     disable: process.env.NODE_ENV === 'development',
     buildExcludes: [/middleware-manifest\\.json$/],
+    // Force cache refresh
+    fallbacks: {
+        document: '/offline',
+    },
+    cacheOnFrontEndNav: true,
+    reloadOnOnline: true,
 });
 
 /** @type {import('next').NextConfig} */

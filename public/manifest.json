@@ -1,6 +1,7 @@
 {
     "name": "VYAAS AI",
     "short_name": "VYAAS",
+    "version": "2.0.0",
     "description": "AI Voice Assistant - Your Personal AI Companion",
     "start_url": "/",
     "display": "standalone",
