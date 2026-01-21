@@ -1,0 +1,34 @@
+# Dependencies
+/node_modules
+/.pnpm-store
+
+# Production
+/build
+/.next/
+/out/
+/dist/
+/dist_electron/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local Env Files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Capacitor
+/android/app/build/
+/ios/App/App/
+
+# Vercel
+.vercel

@@ -1,0 +1,211 @@
+/* Google Fonts DISABLED for Electron offline compatibility */
+/* @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap'); */
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap'); */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        /* Dark Sci-Fi Theme Variables - With Grey Touches */
+        --background: 0 0% 8%;
+        /* #141414 - Slightly lighter for better contrast */
+        --foreground: 0 0% 98%;
+        /* #fafafa */
+
+        --card: 0 0% 12%;
+        /* #1f1f1f - Cards slightly lighter than background */
+        --card-foreground: 0 0% 98%;
+
+        --popover: 0 0% 10%;
+        /* #1a1a1a */
+        --popover-foreground: 0 0% 98%;
+
+        --primary: 154 55% 60%;
+        /* #4ade80 - Neon Mint/Green */
+        --primary-foreground: 240 5.9% 10%;
+
+        --secondary: 0 0% 18%;
+        /* #2e2e2e - Grey for secondary elements */
+        --secondary-foreground: 0 0% 98%;
+
+        --muted: 0 0% 15%;
+        /* #262626 */
+        --muted-foreground: 0 0% 60%;
+        /* #999999 - Visible muted text */
+
+        --accent: 0 0% 20%;
+        /* #333333 */
+        --accent-foreground: 0 0% 98%;
+
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+
+        --border: 0 0% 20%;
+        /* #333333 - More visible borders */
+        --input: 0 0% 15%;
+        --ring: 154 55% 60%;
+
+        --radius: 0.75rem;
+
+        /* Fonts */
+        --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+        --font-mono: 'Rajdhani', ui-monospace, SFMono-Regular, monospace;
+    }
+
+    .dark {
+        --background: 0 0% 8%;
+        --foreground: 0 0% 98%;
+        --card: 0 0% 12%;
+        --card-foreground: 0 0% 98%;
+        --popover: 0 0% 10%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 154 55% 60%;
+        --primary-foreground: 240 5.9% 10%;
+        --secondary: 0 0% 18%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 0 0% 15%;
+        --muted-foreground: 0 0% 60%;
+        --accent: 0 0% 20%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 0 0% 20%;
+        --input: 0 0% 15%;
+        --ring: 154 55% 60%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        background: radial-gradient(circle at center, #1e1e1e 0%, #0d0d0d 100%);
+        min-height: 100vh;
+    }
+}
+
+@layer utilities {
+    .text-neon-green {
+        color: #4ade80;
+        text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+    }
+
+    .border-neon-green\/20 {
+        border-color: rgba(74, 222, 128, 0.2);
+    }
+
+    .bg-glass-dark {
+        background-color: rgba(10, 10, 12, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Animation Utilities */
+    .animate-spin-slow {
+        animation: spin 3s linear infinite;
+    }
+
+    .animate-pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+
+        0%,
+        100% {
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+        }
+
+        50% {
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
+        }
+    }
+
+    /* Custom Slider Styling */
+    .slider-custom {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 12px;
+        border-radius: 12px;
+        outline: none;
+    }
+
+    .slider-custom::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+    }
+
+    .slider-custom::-webkit-slider-thumb:hover {
+        background: #f5f5f5;
+        box-shadow: 0 0 16px rgba(255, 255, 255, 0.5), 0 4px 8px rgba(0, 0, 0, 0.4);
+        transform: scale(1.15);
+    }
+
+    .slider-custom::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+    }
+
+    .slider-custom::-moz-range-thumb:hover {
+        background: #f5f5f5;
+        box-shadow: 0 0 16px rgba(255, 255, 255, 0.5), 0 4px 8px rgba(0, 0, 0, 0.4);
+        transform: scale(1.15);
+    }
+
+    .slider-custom::-moz-range-track {
+        height: 12px;
+        border-radius: 12px;
+    }
+
+    /* Custom Scrollbar Styling */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0a0a0a;
+        border-radius: 8px;
+        margin: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #2a2a2a;
+        border-radius: 8px;
+        border: 2px solid #0a0a0a;
+        transition: background 0.2s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #3a3a3a;
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+        background: #4a4a4a;
+    }
+
+    /* Firefox scrollbar */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: #2a2a2a #0a0a0a;
+    }
+}
