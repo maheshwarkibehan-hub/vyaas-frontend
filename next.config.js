@@ -26,10 +26,8 @@ const nextConfig = {
         ignoreBuildErrors: true,
     },
 
-    // Skip ESLint during build (for faster builds)
-    eslint: {
-        ignoreDuringBuilds: true,
-    },
+    // Note: ESLint config moved to eslint.config.js in Next.js 16
+    // eslint: { ignoreDuringBuilds: true } is now deprecated
 
     // Compiler optimizations
     compiler: {
@@ -72,6 +70,9 @@ const nextConfig = {
         }
         return config;
     },
+
+    // Next.js 16: Enable Turbopack compatibility
+    turbopack: {},
 };
 
 module.exports = nextConfig;
