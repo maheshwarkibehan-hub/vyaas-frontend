@@ -46,6 +46,7 @@ import { SystemLogsModal } from '@/components/app/system-logs-modal';
 import { SystemHealthModal } from '@/components/app/system-health-modal';
 import { GoogleMapComponent } from '@/components/app/map-component';
 import FaceOverlay from '@/components/app/face-overlay';
+import { LocalCommandBridge } from '@/components/livekit/local-command-bridge';
 
 const MotionBottom = motion.create('div');
 
@@ -576,6 +577,8 @@ export const SessionView = ({
         isOpen={showHealthCheck}
         onClose={() => setShowHealthCheck(false)}
       />
+      {/* Local Command Bridge - Receives commands from AI and forwards to Desktop Bridge */}
+      <LocalCommandBridge />
     </section >
   );
 };
