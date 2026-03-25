@@ -68,6 +68,19 @@
 }
 
 @layer base {
+    html {
+        /* Base scaling: shrink UI by 20% to simulate 80% browser zoom */
+        font-size: 80%; 
+    }
+    
+    @media (max-width: 1024px) {
+        html { font-size: 85%; } /* Slightly larger on tablets for readability */
+    }
+    
+    @media (max-width: 768px) {
+        html { font-size: 90%; } /* Closer to normal on mobile so text remains legible */
+    }
+
     * {
         @apply border-border;
     }

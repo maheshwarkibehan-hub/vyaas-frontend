@@ -16,8 +16,9 @@ export function ParticleOrb() {
 
         let particles: any[] = [];
         let animationFrameId: number;
-        const particleCount = 600;
-        const sphereRadius = 110; // Further reduced size
+        // Dynamically reduce particles on mobile for lag-free performance
+        const particleCount = window.innerWidth < 768 ? 250 : 600;
+        const sphereRadius = 110; 
 
         // Initialize particles
         for (let i = 0; i < particleCount; i++) {

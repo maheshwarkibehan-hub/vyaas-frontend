@@ -6,15 +6,21 @@ export const InteractiveBackground = () => {
     const [dimensions, setDimensions] = useState({ w: 1920, h: 1080 });
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const [isMobile, setIsMobile] = useState(false);
+
     useEffect(() => {
         setDimensions({ w: window.innerWidth, h: window.innerHeight });
+        setIsMobile(window.innerWidth < 768);
 
         const handleMouseMove = (e: MouseEvent) => {
-            setMousePosition({ x: e.clientX, y: e.clientY });
+            if (window.innerWidth >= 768) {
+                setMousePosition({ x: e.clientX, y: e.clientY });
+            }
         };
 
         const handleResize = () => {
             setDimensions({ w: window.innerWidth, h: window.innerHeight });
+            setIsMobile(window.innerWidth < 768);
         };
 
         window.addEventListener('mousemove', handleMouseMove);
@@ -79,51 +85,57 @@ export const InteractiveBackground = () => {
                 }}
             />
 
-            {/* Deep trailing glow - largest, slowest */}
-            <motion.div
-                className="absolute w-[1200px] h-[1200px] rounded-full"
-                style={{
-                    x: deepX,
-                    y: deepY,
-                    translateX: '-50%',
-                    translateY: '-50%',
-                    background: 'radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 55%)',
-                    willChange: 'transform',
-                }}
-            />
+            {/* Deep trailing glow - largest, slowest (Disabled on Mobile) */}
+            {!isMobile && (
+                <motion.div
+                    className="absolute w-[1200px] h-[1200px] rounded-full"
+                    style={{
+                        x: deepX,
+                        y: deepY,
+                        translateX: '-50%',
+                        translateY: '-50%',
+                        background: 'radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 55%)',
+                        willChange: 'transform',
+                    }}
+                />
+            )}
 
-            {/* Trailing aura - medium speed */}
-            <motion.div
-                className="absolute w-[900px] h-[900px] rounded-full"
-                style={{
-                    x: trailX,
-                    y: trailY,
-                    translateX: '-50%',
-                    translateY: '-50%',
-                    background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 55%)',
-                    willChange: 'transform',
-                }}
-            />
+            {/* Trailing aura - medium speed (Disabled on Mobile) */}
+            {!isMobile && (
+                <motion.div
+                    className="absolute w-[900px] h-[900px] rounded-full"
+                    style={{
+                        x: trailX,
+                        y: trailY,
+                        translateX: '-50%',
+                        translateY: '-50%',
+                        background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 55%)',
+                        willChange: 'transform',
+                    }}
+                />
+            )}
 
             {/* Primary spotlight - fast follow */}
-            <motion.div
-                className="absolute w-[600px] h-[600px] rounded-full"
-                style={{
-                    x,
-                    y,
-                    translateX: '-50%',
-                    translateY: '-50%',
-                    background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 30%, transparent 60%)',
-                    willChange: 'transform',
-                }}
-            />
+            {!isMobile && (
+                <motion.div
+                    className="absolute w-[600px] h-[600px] rounded-full"
+                    style={{
+                        x,
+                        y,
+                        translateX: '-50%',
+                        translateY: '-50%',
+                        background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 30%, transparent 60%)',
+                        willChange: 'transform',
+                    }}
+                />
+            )}
 
-            {/* Inner bright core */}
+            {/* Inner bright core (Lightweight for Mobile/Desktop) */}
             <motion.div
                 className="absolute w-[200px] h-[200px] rounded-full"
                 style={{
-                    x,
-                    y,
+                    x: isMobile ? dimensions.w / 2 : x,
+                    y: isMobile ? dimensions.h / 2 : y,
                     translateX: '-50%',
                     translateY: '-50%',
                     background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
