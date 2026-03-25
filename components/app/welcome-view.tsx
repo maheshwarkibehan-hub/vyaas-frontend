@@ -179,11 +179,11 @@ export const WelcomeView = ({
     ];
 
     return (
-        <div ref={ref} className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
+        <div ref={ref} className="min-h-[100dvh] bg-background text-foreground relative overflow-x-hidden">
             <InteractiveBackground />
 
             {/* Hero Section - Mobile Optimized */}
-            <section className="relative min-h-screen flex items-center justify-center px-4 py-16 pt-24">
+            <section className="relative min-h-[100dvh] flex items-center justify-center px-4 py-16 pt-24">
                 <div className="max-w-6xl mx-auto text-center w-full">
                     <motion.div
                         initial={initialRender ? { opacity: 0, y: 30 } : false}
@@ -284,12 +284,21 @@ export const WelcomeView = ({
                             {/* Fullscreen Button */}
                             <button
                                 onClick={() => {
-                                    if (!document.fullscreenElement) {
-                                        document.documentElement.requestFullscreen().catch(err => {
-                                            toast.error('Fullscreen not supported');
-                                        });
+                                    const el = document.documentElement as any;
+                                    const requestFs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+                                    
+                                    if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+                                        if (requestFs) {
+                                            requestFs.call(el).catch((err: any) => {
+                                                toast.error('Fullscreen blocked natively. Tip: Add app to Homescreen');
+                                            });
+                                        } else {
+                                            toast.error('Fullscreen not supported on this browser. Use Add to Homescreen.');
+                                        }
                                     } else {
-                                        document.exitFullscreen();
+                                        const doc = document as any;
+                                        const exitFs = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+                                        if (exitFs) exitFs.call(doc);
                                     }
                                 }}
                                 className="relative z-10 w-full md:w-auto px-8 py-4 bg-secondary text-secondary-foreground font-bold text-lg rounded-full shadow-clay-light-sm dark:shadow-clay-sm transition-all hover:scale-105 active:scale-95 active:shadow-inner flex items-center gap-2 justify-center"

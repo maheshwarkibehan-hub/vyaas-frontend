@@ -64,33 +64,33 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const styles = getStyles(appConfig);
 
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn(
-        outfit.variable,
-        commitMono.variable,
-        'scroll-smooth font-sans antialiased h-full w-full'
-      )}
-    >
-      <head>
-        {styles && <style>{styles}</style>}
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <ApplyThemeScript />
-
-        {/* PWA Meta Tags */}
-        <link rel="icon" type="image/png" href="/favicon.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#7e22ce" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="VYAAS AI" />
-        <link rel="apple-touch-icon" href="/vyaas-logo.png" />
-      </head>
-      <body className="h-full w-full overflow-hidden bg-background">
-        <script dangerouslySetInnerHTML={{
+      <html
+        lang="en"
+        suppressHydrationWarning
+        className={cn(
+          outfit.variable,
+          commitMono.variable,
+          'scroll-smooth font-sans antialiased h-[100dvh] w-full'
+        )}
+      >
+        <head>
+          {styles && <style>{styles}</style>}
+          <title>{pageTitle}</title>
+          <meta name="description" content={pageDescription} />
+          <ApplyThemeScript />
+  
+          {/* PWA Meta Tags */}
+          <link rel="icon" type="image/png" href="/favicon.png" />
+          <link rel="manifest" href="/manifest.json" />
+          <meta name="theme-color" content="#7e22ce" />
+          <meta name="mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta name="apple-mobile-web-app-title" content="VYAAS AI" />
+          <link rel="apple-touch-icon" href="/vyaas-logo.png" />
+        </head>
+        <body className="h-[100dvh] w-full overflow-hidden bg-background">
+          <script dangerouslySetInnerHTML={{
           __html: `
           (function() {
             function adjustZoom() {
