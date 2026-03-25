@@ -1,0 +1,179 @@
+/* Light Theme - 2026 Tactile Monochrome */
+
+html.light {
+    background: #fdfdfd; 
+    min-height: 100vh;
+}
+
+html.light body {
+    background: transparent;
+    color: #1a1a1a;
+}
+
+/* Text Colors */
+html.light .text-white,
+html.light h2,
+html.light h3,
+html.light p,
+html.light span {
+    color: #1a1a1a !important;
+}
+
+/* Main Headings */
+html.light h1 {
+    color: #000000 !important;
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+    font-weight: 800 !important;
+}
+
+html.light .text-white\/80,
+html.light .text-white\/70 {
+    color: #333333 !important;
+}
+
+html.light .text-white\/60,
+html.light .text-white\/50 {
+    color: #666666 !important;
+}
+
+html.light .text-white\/40,
+html.light .text-white\/30 {
+    color: #999999 !important;
+}
+
+/* Navbar */
+html.light nav {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e5e5e5 !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05), inset 0 -2px 5px rgba(0,0,0,0.02) !important;
+    backdrop-filter: none !important; /* Removed glassmorphism */
+}
+
+/* Logo */
+html.light nav .bg-gradient-to-br {
+    background: #f0f0f0 !important;
+    box-shadow: inset 1px 1px 3px rgba(255,255,255,1), inset -1px -1px 3px rgba(0,0,0,0.1), 2px 2px 5px rgba(0,0,0,0.1) !important;
+}
+
+/* Hero Text */
+html.light .bg-clip-text {
+    background: none !important;
+    color: #111111 !important;
+    -webkit-text-fill-color: initial !important;
+}
+
+/* Backgrounds */
+html.light .bg-black,
+html.light .bg-black\/20,
+html.light .bg-black\/40 {
+    background: #e5e5e5 !important;
+}
+
+html.light .bg-white\/5,
+html.light .bg-white\/10 {
+    background: #fafafa !important;
+    border-color: #d4d4d4 !important;
+}
+
+/* Cards - Claymorphism */
+html.light .rounded-xl,
+html.light .rounded-2xl {
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.08), -8px -8px 16px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(255, 255, 255, 1), inset -2px -2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .rounded-xl:hover,
+html.light .rounded-2xl:hover {
+    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.12), -12px -12px 24px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(255, 255, 255, 1), inset -2px -2px 4px rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* Borders */
+html.light .border-white\/10,
+html.light .border-white\/5 {
+    border-color: #e5e5e5 !important;
+}
+
+/* Footer */
+html.light footer {
+    background: #ffffff !important;
+    border-top: 1px solid #e5e5e5 !important;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Buttons */
+html.light button:not([class*="gradient"]) {
+    color: #111111 !important;
+    background: #f5f5f5 !important;
+    border: none !important;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1), -4px -4px 10px rgba(255, 255, 255, 1), inset 2px 2px 5px rgba(255, 255, 255, 1), inset -2px -2px 5px rgba(0, 0, 0, 0.05) !important;
+    border-radius: 9999px !important; /* Emphasize pill shape for tactile feel */
+}
+
+html.light button:not([class*="gradient"]):hover {
+    background: #e5e5e5 !important;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15), -2px -2px 5px rgba(255, 255, 255, 1), inset 4px 4px 8px rgba(0, 0, 0, 0.1), inset -4px -4px 8px rgba(255, 255, 255, 1) !important;
+}
+
+/* Strip out all colors */
+html.light .text-purple-400,
+html.light .text-purple-300,
+html.light .text-blue-400,
+html.light .text-green-400,
+html.light .text-red-400 {
+    color: #444444 !important;
+}
+
+/* Session View */
+html.light section {
+    background: transparent !important;
+}
+
+/* History Drawer */
+html.light .z-\[70\] {
+    background: #fafafa !important;
+    border-left: 1px solid #e5e5e5 !important;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* User Menu */
+html.light div[class*="bg-"][class*="1a1a1c"] {
+    background: #ffffff !important;
+    border: 1px solid #e5e5e5 !important;
+    box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Modals */
+html.light .fixed.inset-0[class*="bg-black"] {
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* Scrollbar */
+html.light ::-webkit-scrollbar-track {
+    background: #f5f5f5;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+    background: #cccccc;
+    border-radius: 10px;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+    background: #999999;
+}
+
+/* Selection */
+html.light ::selection {
+    background: #cccccc !important;
+    color: #000000 !important;
+}
+
+/* Ambient Glow - removed */
+html.light div[class*="bg-secondary"],
+html.light div[class*="bg-secondary"] {
+    background: none !important;
+}
