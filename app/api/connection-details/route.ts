@@ -31,7 +31,6 @@ export async function POST(req: Request) {
     const chatId: string = body?.chatId; // Incoming chatId to resume
 
     // ✅ Generate participant info
-    // If username is provided (logged in), use it. Otherwise use random ID.
     const participantName = username || 'user';
     const participantIdentity = username || `voice_assistant_user_${Math.floor(Math.random() * 10_000)}`;
     const roomName = `voice_assistant_room_${Math.floor(Math.random() * 10_000)}`;

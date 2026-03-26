@@ -1,90 +1,75 @@
-# VYAAS AI - Voice-Enabled AI Assistant
+# Vyaas AI Frontend (Cross-Platform)
 
-A modern AI assistant application built with Next.js, featuring voice interaction, real-time communication, and a beautiful user interface.
+**Vyaas AI Frontend** is the user-facing application for the Vyaas AI personal desktop and mobile assistant. It is built as a highly responsive, cross-platform mono-codebase supporting the Web, Android (via Capacitor), and Windows/Desktop (via Electron).
 
-## 🚀 Features
+This repository contains the Next.js React application, complex UI components, realtime WebSocket handlers, and native bridges needed to securely communicate with the LiveKit backend agent.
 
-- **Voice Interaction** - Natural voice conversations powered by LiveKit
-- **Real-time Chat** - Instant messaging with AI
-- **User Authentication** - Secure Firebase authentication
-- **Admin Dashboard** - Complete admin panel for user management
-- **Winter Events** - Special seasonal rewards system
-- **Responsive Design** - Works on desktop and mobile
+## 🚀 Key Features
 
-## 🛠️ Tech Stack
+*   **Cross-Platform Architecture:**
+    *   **Web/PWA:** Runs seamlessly in the browser.
+    *   **Desktop (Electron):** Packs the core AI brain alongside the frontend for a portable, native Windows/macOS experience (`VyaasAI_Brain.exe` binding).
+    *   **Android (Capacitor):** Wraps the web view in native Android APIs for deep device integration.
+*   **Realtime Voice/Video AI:** Deeply integrates `@livekit/components-react` to stream audio/video securely from the user's device directly to the AI agent.
+*   **Authentication & State Management:**
+    *   **Firebase Auth:** For secure, robust user sign-ins and identity.
+    *   **Supabase Realtime:** Maintains live data synchronization for credits, active subscription plan limits, and instant push notifications (`user_notifications` and `admin_updates`).
+*   **Advanced Modern UI/UX:** Built with TailwindCSS v3, Framer Motion, and Radix UI primitives. It features "Claymorphism" and modern monochrome/glass textures, interactive states (like dynamic Snowfall), and a floating navigational pill.
+*   **Feature-Rich Interface:** 
+    *   **Credit/Token System:** Tracks API usage, visualizes credit balances, and includes a built-in Pricing & Checkout flow.
+    *   **Floating Mini Bar & Mini Mode:** A compact desktop widget-like view that runs seamlessly over other applications.
+    *   **History & Inbox Drawers:** For reviewing past chat/agent logs and receiving system notifications.
 
-- **Framework**: Next.js 14+ (App Router)
-- **Styling**: Tailwind CSS
-- **UI Components**: Radix UI + shadcn/ui
-- **Authentication**: Firebase Auth
-- **Database**: Supabase (PostgreSQL)
-- **Voice/Video**: LiveKit
-- **Animations**: Framer Motion
+## 📁 Architecture & Directory Structure
 
-## 📦 Installation
+1.  ### `app/` & `components/`
+    The core Next.js 14 Web UI. `components/app/app.tsx` acts as the primary layout wrapper handling deep state initialization: Firebase Auth checks, Supabase socket connections, user plan polling, and LiveKit session context injection.
+    
+2.  ### `electron/`
+    Scripts and configurations necessary to build the desktop `.exe` package. It bundles `next:dev` or `out/` bundles with the Electron shell to run Vyaas as a standalone local application.
+    
+3.  ### `android/` & `capacitor.config.ts`
+    Leverages Ionic Capacitor to compile this exact React application into a native `.apk`/`.aab` package, giving it permissions for the Android camera, microphone, file system, and push services.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/vyaas-ai.git
-   cd vyaas-ai
-   ```
+4.  ### `lib/` & `hooks/`
+    Shared utilities for connecting to Supabase (`lib/supabase.ts`), Firebase (`lib/firebase.ts`), handling local subscriptions (`lib/subscription.ts`), and global utility classes.
 
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   pnpm install
-   ```
+## ⚙️ Environment Variables
 
-3. Set up environment variables:
-   ```bash
-   cp .env.example .env.local
-   ```
-   Then fill in your credentials in `.env.local`
+Copy `.env.example` to `.env.local` and configure your credentials:
 
-4. Run the development server:
-   ```bash
-   npm run dev
-   # or
-   pnpm dev
-   ```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## 🔧 Environment Variables
-
-Copy `.env.example` to `.env.local` and fill in the required values:
-
-- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anonymous key
-- `NEXT_PUBLIC_FIREBASE_*` - Your Firebase configuration
-- `NEXT_PUBLIC_LIVEKIT_URL` - Your LiveKit server URL
-- `LIVEKIT_API_KEY` & `LIVEKIT_API_SECRET` - Your LiveKit credentials
-
-## 📁 Project Structure
-
-```
-├── app/                  # Next.js App Router pages
-│   ├── api/             # API routes
-│   ├── admin/           # Admin dashboard
-│   └── ...
-├── components/          # React components
-│   ├── ui/             # Base UI components
-│   └── app/            # Application components
-├── hooks/              # Custom React hooks
-├── lib/                # Utility functions & configurations
-├── public/             # Static assets
-└── styles/             # Global styles
+```properties
+NEXT_PUBLIC_SUPABASE_URL="..."
+NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
+NEXT_PUBLIC_FIREBASE_API_KEY="..."
+# Add your other Firebase / LiveKit specific public keys here
 ```
 
-## 🤝 Contributing
+## 🛠️ Scripts & Setup
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Install dependencies using `pnpm` (highly recommended):
+```bash
+pnpm install
+```
 
-## 📄 License
+### Web Development
+To run the Next.js development server locally alongside the backend:
+```bash
+pnpm run dev
+# Or just next.js alone:
+pnpm run next:dev
+```
 
-This project is licensed under the MIT License.
+### Desktop App (Electron) Build
+```bash
+# Builds the frontend and creates a Windows executable
+pnpm run app:build
+```
 
----
-
-Made with ❤️ by VYAAS AI Team
+### Android Build
+*(Requires Android Studio & Java SDK)*
+```bash
+pnpm build
+npx cap sync android
+npx cap open android
+```

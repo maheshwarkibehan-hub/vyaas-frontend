@@ -1,8 +1,55 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Room, RoomEvent, TokenSource } from 'livekit-client';
+import { Room, RoomEvent } from 'livekit-client';
 import { AppConfig } from '@/app-config';
 import { toastAlert } from '@/components/livekit/alert-toast';
 import { auth } from '@/lib/firebase';
+
+type ConnectionDetails = {
+  serverUrl: string;
+  roomName?: string;
+  participantName?: string;
+  participantToken: string;
+};
+
+async function fetchConnectionDetails(
+  appConfig: AppConfig,
+  chatId?: string
+): Promise<ConnectionDetails> {
+  const url = new URL(
+    process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ?? '/api/connection-details',
+    window.location.origin
+  );
+
+  const user = auth.currentUser;
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Sandbox-Id': appConfig.sandboxId ?? '',
+    },
+    body: JSON.stringify({
+      username: user?.email,
+      chatId,
+      room_config: appConfig.agentName
+        ? {
+            agents: [{ agent_name: appConfig.agentName }],
+          }
+        : undefined,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `Connection details request failed with status ${res.status}`);
+  }
+
+  const data = (await res.json()) as ConnectionDetails;
+  console.log('[useRoom] Raw connection details received', {
+    serverUrl: data.serverUrl,
+    roomName: data.roomName,
+  });
+  return data;
+}
 
 export function useRoom(appConfig: AppConfig) {
   const aborted = useRef(false);
@@ -38,45 +85,6 @@ export function useRoom(appConfig: AppConfig) {
     };
   }, [room]);
 
-  const tokenSource = useMemo(
-    () =>
-      TokenSource.custom(async () => {
-        const url = new URL(
-          process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ?? '/api/connection-details',
-          window.location.origin
-        );
-
-        try {
-          // Get current user from Firebase Auth
-          const user = auth.currentUser;
-
-          const res = await fetch(url.toString(), {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Sandbox-Id': appConfig.sandboxId ?? '',
-            },
-            body: JSON.stringify({
-              username: user?.email, // Send email as username
-              chatId: chatIdRef.current, // Pass chatId if user wants to resume
-              room_config: appConfig.agentName
-                ? {
-                  agents: [{ agent_name: appConfig.agentName }],
-                }
-                : undefined,
-            }),
-          });
-          return await res.json();
-        } catch (error) {
-          console.error('Error fetching connection details:', error);
-          const err = error as Error;
-          // Removed debug alert - errors will be shown via toast notifications
-          throw new Error(`Error fetching connection details! ${err.message}`);
-        }
-      }),
-    [appConfig]
-  );
-
   const connectToRoom = useCallback(() => {
     const { isPreConnectBufferEnabled } = appConfig;
     Promise.all([
@@ -85,14 +93,15 @@ export function useRoom(appConfig: AppConfig) {
       }).catch((e) => {
         console.warn("Failed to enable microphone early: ", e);
       }),
-      tokenSource
-        .fetch({ agentName: appConfig.agentName })
-        .then((connectionDetails) => {
+      fetchConnectionDetails(appConfig, chatIdRef.current)
+        .then(async (connectionDetails) => {
+
           // Store connection details for mini mode via Python API
           localStorage.setItem('vyaas_mini_mode_room', JSON.stringify({
             serverUrl: connectionDetails.serverUrl,
             token: connectionDetails.participantToken
           }));
+
           // Also try Python API for desktop app
           // @ts-ignore
           if (window.pywebview?.api?.set_room_data) {
@@ -115,7 +124,7 @@ export function useRoom(appConfig: AppConfig) {
         description: `${error.name}: ${error.message}`,
       });
     });
-  }, [room, appConfig, tokenSource]);
+  }, [room, appConfig]);
 
   const startSession = useCallback((chatId?: string) => {
     // Set the specific chat ID this session should resume

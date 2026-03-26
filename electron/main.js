@@ -1,75 +1,167 @@
-const { app, BrowserWindow } = require('electron');
+/**
+ * main.js
+ * Entry point for Vyaas AI Electron Application
+ */
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
-const { spawn } = require('child_process');
+const log = require('electron-log/main');
+const localExecutor = require('./local-executor');
+const { createTray } = require('./tray');
+const fs = require('fs');
 
-let mainWindow;
-let backendProcess;
-const isDev = !app.isPackaged;
+// Make sure logging is initialized
+log.initialize();
+log.info('Vyaas AI Application Starting...');
 
-// Paths
-const backendExe = isDev
-    ? path.join(__dirname, '../../Backend/dist/VyaasAI_Brain.exe')
-    : path.join(process.resourcesPath, 'backend/VyaasAI_Brain.exe');
+const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
-// Static files location (Next.js 'out' folder)
-const staticDir = isDev
-    ? path.join(__dirname, '../out')
-    : path.join(__dirname, '..', 'out');
-
-async function createWindow() {
-    mainWindow = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        title: "Vyaas AI",
-        icon: path.join(__dirname, '../public/vyaas-logo.png'),
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-        },
-        autoHideMenuBar: true,
-        show: false
-    });
-
-    // 1. Start Backend (The Brain)
-    console.log("Starting Vyaas Brain...", backendExe);
-    try {
-        if (require('fs').existsSync(backendExe)) {
-            backendProcess = spawn(backendExe, [], {
-                cwd: path.dirname(backendExe),
-                stdio: 'ignore'
-            });
-        } else {
-            console.error("Backend EXE not found at:", backendExe);
-        }
-    } catch (e) {
-        console.error("Failed to start backend:", e);
-    }
-
-    // 2. Load Static HTML (No Server Needed)
-    const indexPath = path.join(staticDir, 'index.html');
-    console.log("Loading static UI from:", indexPath);
-
-    mainWindow.loadFile(indexPath);
-
-    mainWindow.on('ready-to-show', () => mainWindow.show());
-
-    mainWindow.on('closed', () => {
-        mainWindow = null;
-    });
+// Prevent multiple instances
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+  process.exit(0);
 }
 
-// App Lifecycle
-app.on('ready', createWindow);
+/** @type {BrowserWindow | null} */
+let mainWindow = null;
 
-app.on('window-all-closed', () => {
-    // Kill child processes
-    if (backendProcess) backendProcess.kill();
+function getWindowIconPath() {
+  const candidates = [
+    path.join(__dirname, '..', 'public', 'vyaas-logo.ico'),
+    path.join(__dirname, '..', 'public', 'vyaas-logo.png'),
+    path.join(__dirname, '..', 'app', 'icon.png'),
+  ];
 
-    if (process.platform !== 'darwin') {
-        app.quit();
+  return candidates.find((candidate) => fs.existsSync(candidate));
+}
+
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    minWidth: 900,
+    minHeight: 650,
+    frame: false, // Frameless window
+    transparent: process.platform === 'darwin', // MacOS vibrancy support
+    vibrancy: process.platform === 'darwin' ? 'under-window' : undefined,
+    visualEffectState: 'active',
+    icon: getWindowIconPath(),
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
+      webSecurity: true,
+    },
+    show: false, // Don't show until ready
+  });
+
+  // Load the Next.js app
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:3000');
+    // Open the DevTools only in dev
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '..', 'out', 'index.html'));
+  }
+
+  // Splash screen logic
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
+
+  // Handle close to minimize to tray
+  mainWindow.on('close', (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
     }
+    return false;
+  });
+
+  // Create the tray
+  try {
+    createTray(mainWindow);
+  } catch (error) {
+    log.error(`[Tray] Failed to initialize tray: ${error.message}`);
+  }
+
+  // Securely intercept external links
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+}
+
+// Single instance lock event
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized() || !mainWindow.isVisible()) {
+      mainWindow.show();
+      mainWindow.restore();
+    }
+    mainWindow.focus();
+  }
 });
 
-app.on('will-quit', () => {
-    if (backendProcess) backendProcess.kill();
+app.whenReady().then(() => {
+  // Local command execution IPC
+  ipcMain.handle('local:execute', async (event, data) => {
+    return await localExecutor.execute(data);
+  });
+
+  // Window controls  
+  ipcMain.handle('window:minimize', () => {
+    if (mainWindow) mainWindow.minimize();
+  });
+  ipcMain.handle('window:maximize', () => {
+    if (mainWindow) {
+      if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize();
+      } else {
+        mainWindow.maximize();
+      }
+    }
+  });
+  ipcMain.handle('window:close', () => {
+    if (mainWindow) mainWindow.hide();
+  });
+  
+  ipcMain.handle('app:version', () => app.getVersion());
+  
+  ipcMain.handle('shell:openExternal', (event, url) => {
+    if (url.startsWith('http') || url.startsWith('mailto')) {
+      shell.openExternal(url);
+    }
+  });
+
+  // Create UI Window
+  createWindow();
+
+  // Setup auto-updater if packaged
+  if (!isDev) {
+    setTimeout(() => {
+      const { autoUpdater } = require('electron-updater');
+      autoUpdater.checkForUpdatesAndNotify();
+    }, 3000);
+  }
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+
+app.on('before-quit', () => {
+  app.isQuitting = true;
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('quit', () => {
+  log.info('Vyaas AI Application Quitting...');
 });

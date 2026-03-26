@@ -31,6 +31,8 @@ import { TokenBalance } from '@/components/app/token-balance';
 import { Gift, FileText, Image as ImageIcon, Terminal } from 'lucide-react';
 import { FloatingMiniBar } from '@/components/app/floating-mini-bar';
 import { MiniModeProvider, useMiniMode } from '@/components/app/mini-mode-provider';
+import { TitleBar } from '@/components/electron/TitleBar';
+import { useElectron } from '@/hooks/useElectron';
 
 interface AppProps {
   appConfig: AppConfig;
@@ -51,6 +53,7 @@ export function App({ appConfig }: AppProps) {
 function AppContent() {
   const { isAuthModalOpen, openAuthModal, closeAuthModal } = useAuthUI();
   const { isMiniMode } = useMiniMode();
+  const { isElectron } = useElectron();
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -227,10 +230,12 @@ function AppContent() {
 
   return (
     <>
+      <TitleBar />
       {/* Navbar - Floating Clay Pill */}
       <nav
         className={cn(
-          "fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl bg-card border border-white/5 rounded-[2rem] shadow-clay-sm transition-all duration-700 ease-in-out safe-top will-change-transform",
+          "fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl bg-card border border-white/5 rounded-[2rem] shadow-clay-sm transition-all duration-700 ease-in-out safe-top will-change-transform",
+          isElectron ? "top-14" : "top-4",
           // Slide up when connected to room OR when splash screen is showing
           (showSplash || roomState === 'connected') ? "-translate-y-[calc(100%+2rem)] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
         )}
@@ -350,7 +355,9 @@ function AppContent() {
         className={cn(
           "h-full w-full bg-background relative overflow-auto flex flex-col transition-all duration-700 ease-in-out",
           // Remove top padding when connected (navbar hidden)
-          roomState === ConnectionState.Connected ? "pt-0" : "pt-16 md:pt-20"
+          roomState === ConnectionState.Connected
+            ? (isElectron ? "pt-10" : "pt-0")
+            : (isElectron ? "pt-24 md:pt-28" : "pt-16 md:pt-20")
         )}
       >
         {/* Subtle Ambient Background */}
