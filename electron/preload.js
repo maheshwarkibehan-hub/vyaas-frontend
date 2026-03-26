@@ -19,4 +19,7 @@ contextBridge.exposeInMainWorld('vyaas', {
 
   // System
   openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
+
+  // Screen share
+  getScreenSources: () => ipcRenderer.invoke('screen:getSources'),
 });

@@ -2,7 +2,7 @@
  * main.js
  * Entry point for Vyaas AI Electron Application
  */
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, desktopCapturer, session } = require('electron');
 const path = require('path');
 const log = require('electron-log/main');
 const localExecutor = require('./local-executor');
@@ -136,8 +136,48 @@ app.whenReady().then(() => {
     }
   });
 
+  // Screen share support - get available screen sources
+  ipcMain.handle('screen:getSources', async () => {
+    const sources = await desktopCapturer.getSources({
+      types: ['screen', 'window'],
+      thumbnailSize: { width: 150, height: 150 },
+    });
+    return sources.map(s => ({
+      id: s.id,
+      name: s.name,
+      thumbnail: s.thumbnail.toDataURL(),
+    }));
+  });
+
   // Create UI Window
   createWindow();
+
+  // Handle screen share / display media requests in Electron
+  // This allows getDisplayMedia() to work in the renderer
+  mainWindow.webContents.session.setDisplayMediaRequestHandler(
+    (request, callback) => {
+      desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
+        // Auto-select the primary screen
+        if (sources.length > 0) {
+          callback({ video: sources[0] });
+        } else {
+          callback({});
+        }
+      });
+    }
+  );
+
+  // Grant permissions for media
+  mainWindow.webContents.session.setPermissionRequestHandler(
+    (webContents, permission, callback) => {
+      const allowedPermissions = [
+        'media', 'display-capture', 'mediaKeySystem',
+        'geolocation', 'notifications', 'clipboard-read',
+        'clipboard-sanitized-write'
+      ];
+      callback(allowedPermissions.includes(permission));
+    }
+  );
 
   // Setup auto-updater if packaged
   if (!isDev) {
