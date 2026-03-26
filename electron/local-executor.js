@@ -103,8 +103,44 @@ async function execute(data) {
       case 'shutdown':
         return await shutdownPc(params.delay ?? 60);
 
+      case 'restart_pc':
+        return await restartPc(params.delay ?? 60);
+
       case 'cancel_shutdown':
         return await cancelShutdown();
+
+      case 'clipboard_read':
+        return await clipboardRead();
+
+      case 'get_active_window':
+        return await getActiveWindow();
+
+      case 'kill_process':
+        return await killProcess(params.name || '');
+
+      case 'list_processes':
+        return await listProcesses();
+
+      case 'set_brightness':
+        return await setBrightness(params.level ?? 50);
+
+      case 'toggle_wifi':
+        return await toggleWifi(params.enable ?? true);
+
+      case 'clean_temp':
+        return await cleanTemp();
+
+      case 'open_file':
+        return await openFile(params.path || '');
+
+      case 'open_folder':
+        return await openFolder(params.path || '');
+
+      case 'search_files':
+        return await searchFiles(params.query || '', params.directory || '');
+
+      case 'get_system_stats':
+        return await getSystemStats();
 
       default:
         log.warn(`[LocalExecutor] Unknown command: ${command}`);
@@ -120,7 +156,7 @@ async function execute(data) {
 
 function runCmd(cmd) {
   return new Promise((resolve, reject) => {
-    exec(cmd, { shell: true }, (err, stdout, stderr) => {
+    exec(cmd, { shell: true, maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
       if (err) reject(err);
       else resolve(stdout);
     });
@@ -133,7 +169,6 @@ async function openApp(appName) {
 
   log.info(`[LocalExecutor] Opening: ${appName} -> ${cmd}`);
 
-  // URI schemes (whatsapp:, ms-settings:, etc.)
   if (cmd.endsWith(':') || cmd.includes('://')) {
     await shell.openExternal(cmd);
   } else {
@@ -155,7 +190,6 @@ async function openNotes(content) {
   exec('notepad', { shell: true });
 
   if (content) {
-    // Wait for Notepad to open, then paste via PowerShell
     await new Promise((r) => setTimeout(r, 1500));
     const escaped = content.replace(/'/g, "''");
     const ps = `
@@ -178,7 +212,6 @@ async function sendWhatsApp(phone, message) {
 }
 
 async function sendWhatsAppContact(contact, message) {
-  // Open WhatsApp and search for contact via PowerShell automation
   await shell.openExternal('whatsapp:');
   await new Promise((r) => setTimeout(r, 5000));
 
@@ -216,17 +249,10 @@ async function typeText(text) {
 }
 
 async function pressKey(key) {
-  // Map common key names to SendKeys format
   const keyMap = {
-    enter: '{ENTER}',
-    tab: '{TAB}',
-    escape: '{ESC}',
-    backspace: '{BS}',
-    delete: '{DEL}',
-    up: '{UP}',
-    down: '{DOWN}',
-    left: '{LEFT}',
-    right: '{RIGHT}',
+    enter: '{ENTER}', tab: '{TAB}', escape: '{ESC}',
+    backspace: '{BS}', delete: '{DEL}',
+    up: '{UP}', down: '{DOWN}', left: '{LEFT}', right: '{RIGHT}',
     space: ' ',
     f1: '{F1}', f2: '{F2}', f3: '{F3}', f4: '{F4}',
     f5: '{F5}', f6: '{F6}', f7: '{F7}', f8: '{F8}',
@@ -235,7 +261,6 @@ async function pressKey(key) {
 
   let sendKeysStr;
   if (key.includes('+')) {
-    // Handle combos like ctrl+s, alt+f4
     const parts = key.toLowerCase().split('+');
     let prefix = '';
     let mainKey = '';
@@ -308,9 +333,118 @@ async function shutdownPc(delay) {
   return { success: true, message: `Shutdown in ${delay}s` };
 }
 
+async function restartPc(delay) {
+  exec(`shutdown /r /t ${delay}`);
+  return { success: true, message: `Restart in ${delay}s` };
+}
+
 async function cancelShutdown() {
   exec('shutdown /a');
   return { success: true, message: 'Shutdown cancelled' };
+}
+
+// ============== NEW ADVANCED COMMANDS ==============
+
+async function clipboardRead() {
+  const ps = `Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Clipboard]::GetText()`;
+  const text = await runCmd(`powershell -Command "${ps}"`);
+  return { success: true, message: text.trim() || '(clipboard empty)' };
+}
+
+async function getActiveWindow() {
+  const ps = `
+    Add-Type @"
+    using System;
+    using System.Runtime.InteropServices;
+    using System.Text;
+    public class WinAPI {
+      [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+      [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+      [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
+    }
+"@
+    $h = [WinAPI]::GetForegroundWindow()
+    $sb = New-Object Text.StringBuilder 256
+    [WinAPI]::GetWindowText($h, $sb, 256)
+    $pid = 0; [WinAPI]::GetWindowThreadProcessId($h, [ref]$pid)
+    $proc = Get-Process -Id $pid -ErrorAction SilentlyContinue
+    "$($sb.ToString())|$($proc.ProcessName)|$pid"
+  `;
+  const result = await runCmd(`powershell -Command "${ps.replace(/\n/g, '; ')}"`);
+  const [title, procName, pid] = result.trim().split('|');
+  return { success: true, message: JSON.stringify({ title, process: procName, pid }) };
+}
+
+async function killProcess(name) {
+  const cleanName = name.replace(/[^a-zA-Z0-9._-]/g, '');
+  await runCmd(`taskkill /IM "${cleanName}" /F`);
+  return { success: true, message: `Killed ${name}` };
+}
+
+async function listProcesses() {
+  const ps = `Get-Process | Sort-Object -Property WS -Descending | Select-Object -First 15 Name,Id,@{N='MemMB';E={[math]::Round($_.WS/1MB,1)}} | ConvertTo-Json`;
+  const result = await runCmd(`powershell -Command "${ps}"`);
+  return { success: true, message: result.trim() };
+}
+
+async function setBrightness(level) {
+  level = Math.max(0, Math.min(100, level));
+  const ps = `(Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1,${level})`;
+  await runCmd(`powershell -Command "${ps}"`);
+  return { success: true, message: `Brightness set to ${level}%` };
+}
+
+async function toggleWifi(enable) {
+  const action = enable ? 'enable' : 'disable';
+  await runCmd(`netsh interface set interface "Wi-Fi" ${action}`);
+  return { success: true, message: `Wi-Fi ${action}d` };
+}
+
+async function cleanTemp() {
+  const ps = `
+    $before = (Get-ChildItem $env:TEMP -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+    Remove-Item "$env:TEMP\\*" -Recurse -Force -ErrorAction SilentlyContinue
+    $after = (Get-ChildItem $env:TEMP -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+    $freed = [math]::Round(($before - $after)/1MB, 1)
+    "Cleaned $freed MB"
+  `;
+  const result = await runCmd(`powershell -Command "${ps.replace(/\n/g, '; ')}"`);
+  return { success: true, message: result.trim() };
+}
+
+async function openFile(filePath) {
+  await shell.openPath(filePath);
+  return { success: true, message: `Opened ${filePath}` };
+}
+
+async function openFolder(folderPath) {
+  const target = folderPath || os.homedir();
+  await shell.openPath(target);
+  return { success: true, message: `Opened ${target}` };
+}
+
+async function searchFiles(query, directory) {
+  const dir = directory || os.homedir();
+  const ps = `Get-ChildItem -Path "${dir}" -Filter "*${query}*" -Recurse -ErrorAction SilentlyContinue -Depth 3 | Select-Object -First 10 FullName,Length,LastWriteTime | ConvertTo-Json`;
+  const result = await runCmd(`powershell -Command "${ps}"`);
+  return { success: true, message: result.trim() || 'No files found' };
+}
+
+async function getSystemStats() {
+  const ps = `
+    $cpu = (Get-WmiObject Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
+    $mem = Get-WmiObject Win32_OperatingSystem
+    $usedGB = [math]::Round(($mem.TotalVisibleMemorySize - $mem.FreePhysicalMemory)/1MB, 1)
+    $totalGB = [math]::Round($mem.TotalVisibleMemorySize/1MB, 1)
+    $disk = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='C:'"
+    $diskFreeGB = [math]::Round($disk.FreeSpace/1GB, 1)
+    $diskTotalGB = [math]::Round($disk.Size/1GB, 1)
+    $battery = Get-WmiObject Win32_Battery -ErrorAction SilentlyContinue
+    $battPct = if($battery){$battery.EstimatedChargeRemaining}else{'N/A'}
+    @{CPU="$cpu%";RAM="$usedGB/$totalGB GB";Disk="$diskFreeGB/$diskTotalGB GB free";Battery="$battPct%"} | ConvertTo-Json
+  `;
+  const result = await runCmd(`powershell -Command "${ps.replace(/\n/g, '; ')}"`);
+  return { success: true, message: result.trim() };
 }
 
 module.exports = { execute };
