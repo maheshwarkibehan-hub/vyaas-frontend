@@ -15,12 +15,18 @@ export interface VyaasElectronAPI {
   getAppVersion: () => Promise<string>;
   getPlatform: () => string;
   openExternal: (url: string) => Promise<void>;
+  getScreenSources?: () => Promise<any>;
 }
 
 // Extend Window interface for TypeScript
 declare global {
   interface Window {
     vyaas?: VyaasElectronAPI;
+    vyaasParams?: {
+      toggleScreen?: () => void;
+      toggleMic?: () => void;
+      toggleCamera?: () => void;
+    };
   }
 }
 
